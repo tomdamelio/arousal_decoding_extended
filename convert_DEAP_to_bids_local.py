@@ -8,6 +8,9 @@ from mne_bids.stats import count_events
 from sympy import false
 
 #%%
+#test commit
+
+#%%
 # Run just subject 1
 DEBUG = True
 #%%
