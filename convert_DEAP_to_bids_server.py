@@ -122,7 +122,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Convert DEAP to BIDS.')
     parser.add_argument(
         '--deap_data_dir', type=str,
-        default='/data',
+        default='/home/tomas_damelio/data',
         help='Path to the original data.')
     parser.add_argument(
         '--bids_save_dir', type=str,
