@@ -17,7 +17,7 @@ def convert_deap_to_bids(deap_data_dir, bids_save_dir, n_jobs=1, DEBUG=False):
     ----------
     deap_data_dir : str
         Directory where the original DEAP dataset is saved, e.g.
-        `C:/Users/dadam/OneDrive/Escritorio/tomas_damelio/data`.
+        `/data`.
     bids_save_dir : str
         Directory where to save the BIDS version of the dataset.
     n_jobs : None | int
@@ -35,6 +35,7 @@ def convert_deap_to_bids(deap_data_dir, bids_save_dir, n_jobs=1, DEBUG=False):
         delayed(_convert_subject)(subject, deap_data_dir, bids_save_dir)
         for subject in subjects_) 
 
+#%%
 def _convert_subject(subject, data_path, bids_save_dir):
     """Get the work done for one subject"""
     try:
@@ -103,25 +104,25 @@ def _convert_subject(subject, data_path, bids_save_dir):
                         'unknown_4': 5832452,
                         'unknown_5': 5832453}
 
-            bids_path = BIDSPath(
-                subject=subject, task='rest',root=bids_save_dir)
+        bids_path = BIDSPath(
+            subject=subject, task='rest',root=bids_save_dir)
 
-            write_raw_bids(
-                raw,
-                bids_path,
-                events_data=events,
-                event_id=event_id,
-                overwrite=True
+        write_raw_bids(
+            raw,
+            bids_path,
+            events_data=events,
+            event_id=event_id,
+            overwrite=True
             )
     except Exception as err:
         print(err)
     return subject
-    
+#%%
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Convert DEAP to BIDS.')
     parser.add_argument(
         '--deap_data_dir', type=str,
-        default='C:/Users/dadam/OneDrive/Escritorio/tomas_damelio/data',
+        default='/data',
         help='Path to the original data.')
     parser.add_argument(
         '--bids_save_dir', type=str,
@@ -142,3 +143,6 @@ if __name__ == '__main__':
     print_dir_tree(args.deap_data_dir)
     print(make_report(args.deap_data_dir))
 
+
+
+# %%
