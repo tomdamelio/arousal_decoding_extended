@@ -39,7 +39,7 @@ def convert_deap_to_bids(deap_data_dir, bids_save_dir, n_jobs=1, DEBUG=False):
 def _convert_subject(subject, data_path, bids_save_dir):
     """Get the work done for one subject"""
     try:
-        fname = pathlib.Path(data_path) / f"S{subject}.bdf"    
+        fname = pathlib.Path(data_path) / f"s{subject}.bdf"    
         raw = mne.io.read_raw_bdf(fname)
         
         # declare montage
