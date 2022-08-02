@@ -241,13 +241,4 @@ def save_bad_resp_and_no_stim_annotations(subject_number  = subject_number,
             later_annot.save(fname = fname_5, overwrite=True)
 
 #%%                                                                         
-#save_bad_resp_and_no_stim_annotations()
-
-#%%
-save_bad_resp_and_no_stim_annotations(subject_number  = ['20'],
-                                        plot_data_bad_no_stim = True,
-                                        save_data_bad_no_stim = True,
-                                        save_just_no_stim_annotations = True)
-
-
-# %%
+save_bad_resp_and_no_stim_annotations()
