@@ -20,8 +20,8 @@ ch_types = ['eeg']
 
 data_type = 'eeg'
 
-#subjects = 'all'
-subjects = ['01']
+subjects = 'all'
+#subjects = ['01']
 
 #drop_channels = ['-1', '-0', 'GSR2', 'Erg1', 'Erg2']
 
@@ -61,7 +61,11 @@ rest_epochs_overlap = 1.
 
 baseline =  None 
 
+#spatial_filter = 'ssp'
+
 ssp_reject_eog = 'autoreject_global'
+
+ssp_reject_ecg = 'autoreject_global'
 
 ssp_autoreject_decim = 5
 
