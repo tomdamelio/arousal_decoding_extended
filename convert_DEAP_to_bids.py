@@ -1,4 +1,4 @@
-#%%
+
 import argparse
 import os
 import pathlib
@@ -10,7 +10,6 @@ from mne_bids import BIDSPath, make_report, print_dir_tree, write_raw_bids
 
 from subject_number import subject_number as subject_ids
 
-#%%
 def convert_deap_to_bids(deap_data_dir, bids_save_dir, n_jobs=1, DEBUG=False):
     """Convert DEAP dataset to BIDS format.
     Parameters
@@ -35,7 +34,7 @@ def convert_deap_to_bids(deap_data_dir, bids_save_dir, n_jobs=1, DEBUG=False):
         delayed(_convert_subject)(subject, deap_data_dir, bids_save_dir)
         for subject in subjects_) 
 
-#%%
+
 def _convert_subject(subject, data_path, bids_save_dir):
     """Get the work done for one subject"""
     try:
@@ -117,7 +116,7 @@ def _convert_subject(subject, data_path, bids_save_dir):
     except Exception as err:
         print(err)
     return subject
-#%%
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Convert DEAP to BIDS.')
     parser.add_argument(
@@ -145,4 +144,3 @@ if __name__ == '__main__':
 
 
 
-# %%

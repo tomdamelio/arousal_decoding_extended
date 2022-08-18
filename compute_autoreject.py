@@ -25,7 +25,7 @@ if datasets is None:
     datasets = list(DATASETS)
 print(f"Datasets: {', '.join(datasets)}")
 
-DEBUG = True
+DEBUG = False
 
 def run_subject(subject, cfg):
     deriv_root = cfg.deriv_root
