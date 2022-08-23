@@ -1,24 +1,18 @@
 #%%
-import os
-import os.path as op
-import pathlib
-
 import mne
-
 from subject_number import subject_number
 
-#%%
 
-for i in subject_number: 
-    
-    number_subject = i
-    
-    # open .fif filtered raw files
-    extension = '.fif'
-    directory = 'outputs/DEAP-bids/derivatives/mne-bids-pipeline/'
-    fname_fif = op.join(directory, 'sub-' + number_subject , 'eeg',
-                        'sub-' + number_subject + '_task-rest_proc-filt_raw' + extension)
-    raw = mne.io.read_raw_fif(fname_fif, preload=True) 
+DEBUG = False
+
+if DEBUG:
+    subject_number = ['01']
+
+
+for subject in subject_number: 
+        
+    fname = f'./data/s{subject}.bdf'    
+    raw = mne.io.read_raw_bdf(fname)
     
     # declare montage
     montage = mne.channels.make_standard_montage(kind="biosemi32", head_size=0.095)   
@@ -42,7 +36,7 @@ for i in subject_number:
                             'Plet': 'misc',
                             'Temp': 'misc'}) 
 
-    subject_number = int(number_subject)
+    subject_number = int(subject)
 
     if subject_number > 28:
         raw.rename_channels(mapping={'-1': 'Status'})
@@ -57,14 +51,8 @@ for i in subject_number:
     
     raw.info['line_freq'] = 50  # specify power line frequency as required by BIDS
     
-    # open annotations file
-    extension = '.fif'
-    directory_annot = 'outputs/annotations_bad_no_stim/'
-    fname_fif_annot = op.join(directory_annot, 'sub-' + number_subject + '_annot' + extension)
-    annot_from_file = mne.read_annotations(fname = fname_fif_annot, sfreq=512.)
-    
-    # add annotations to .fif files
-    raw.set_annotations(annot_from_file)
+    fname_fif = f'./data/s{subject}.fif'  
 
     # Export .fif files with annotations
     raw.save(fname = fname_fif, overwrite=True)
+# %%

@@ -26,11 +26,13 @@ subjects = 'all'
 #subjects = ['01']
 
 #drop_channels = ['-1', '-0', 'GSR2', 'Erg1', 'Erg2']
+drop_channels = ['GSR2', 'Erg1', 'Erg2']
 
 eeg_reference = [] 
 
 eeg_template_montage: 'biosemi32'
 
+#analyze_channels = 'all'
 analyze_channels = [
     'F3','F7','FC5','FC1','C3','T7','CP5','CP1',
     'P3','P7','PO3','O1','Oz','Pz','Fp2','AF4',
@@ -39,8 +41,8 @@ analyze_channels = [
 
 conditions = ['rest']
 
-l_freq = 0.1
-h_freq = 49
+l_freq = None # will specify it in an additional script
+h_freq = None # will specify it in an additional script
 
 event_repeated = "drop" 
 

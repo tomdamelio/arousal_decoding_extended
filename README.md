@@ -1,14 +1,13 @@
 # arousal_decoding_extended
-I will now describe the necessary steps to run all the analyses of this project.
+We will now describe the necessary steps to run all the analyses of this project.
 
 '''
-python convert_DEAP_to_bids_server.py &&
+python convert_DEAP_to_bids.py &&
 python create_bad_annotations.py &&
-python ../mne-bids-pipeline-main/run.py --config config_deap_eeg.py --steps=preprocessing/maxfilter &&
-python ../mne-bids-pipeline-main/run.py --config config_deap_eeg.py  --steps=preprocessing/frequency_filter && 
-python add_annotations.py &&
-python ../mne-bids-pipeline-main/run.py --config config_deap_eeg.py--steps=preprocessing/make_epochs &&
-python ../mne-bids-pipeline-main/run.py --config config_deap_eeg.py --steps=preprocessing/ptp_reject &&
+python ../mne-bids-pipeline-main/run.py --config config_deap_eeg.py --steps=preprocessing/frequency_filter && # NOT USED, but genetate copied files that are used by further steps.
+python add_annotations_and_channel_info_to_filt_data.py &&
+python ../mne-bids-pipeline-main/run.py --config config_deap_eeg.py --steps=preprocessing/make_epochs &&
+python ../mne-bids-pipeline-main/run.py --config config_deap_eeg.py --steps=preprocessing/ptp_reject && # NOT USED, but genetate copied files that are used by further steps.
 python compute_ssp.py &&
 python compute_autoreject.py
 '''
@@ -16,18 +15,19 @@ python compute_autoreject.py
 ## Main scripts
 
 - `convert_DEAP_to_bids.py`: Convert DEAP .bdf files into BIDS standard. Runs both on server and locally.
-  - **input:** DEAP data, that by default  has to be saved in `./data` directory. If this data is in another directory, it has to be made explicit when running it (e.g. `python convert_DEAP_to_bids.py --deap_data_dir ./Path/To/Original/Data`).
+  - **input:** .fif files of DEAP data with info added to raw data, that by default  has to be saved in `./data` directory. If this data is in another directory, it has to be made explicit when running it (e.g. `python convert_DEAP_to_bids.py --deap_data_dir ./Path/To/Original/Data`).
   - **output:** DEAP data in BIDS format, by default saved in './outputs/DEAP-bids'. 
 
 - `create_bad_annotations.py`: 
   - **input**:  DEAP data in BIDS format (directory *should* be 'outputs/DEAP-bids').
   - **output**: annotations files (saved in './outputs/annotations_bad_no_stim/) to be added during preprocessing steps.
 
-- `add_annotations.py`: add annotation files to .fif filtered files (after 2nd step of preprocessing).
+- `add_annotations_and_channel_info_to_filt_data.py`: add annotation files to .fif filtered files (after 2nd step of preprocessing).
   - **input**:
     - annotations files (saved in './outputs/annotations_bad_no_stim') .
     - raw .fif files (after maxfilter and frequency filter preprecessing steps). Directory: e.g for subject 01 would be 'outputs/DEAP-bids/derivatives/mne-bids-pipeline/sub-01/eeg/sub-01_task-rest_proc-filt_raw.fif'.
-  - **output**: raw .fif files (after maxfilter and frequency filter preprocessing steps) with annotations (overwrite raw .fif files without annotations).
+  - **output**: raw .fif files (after maxfilter and frequency filter preprocessing steps) with annotations (overwrite raw .fif files without annotations) and cannel info added. EEG + EDA (+ other channels).
+
 
 - `compute_ssp.py`: detect and remove EOG artifacts from preprocessed data
   - **input**:
@@ -49,4 +49,12 @@ python compute_autoreject.py
 ## Deprecated scripts
 
 - `convert_DEAP_to_bids_local.py`: DEPRECATED. Idem to `convert_DEAP_to_bids_server.py` but runs locally.
-- `convert_deap_to_bids_without_function`: DEPRECATED. Idem to `convert_DEAP_to_bids_local.py` but runs without functions, parser, ...
+- `convert_deap_to_bids_without_function`: DEPRECATED. Idem to `convert_DEAP_to_bids_local.py` but runs without functions, parser, ...\- - 
+- `add_annotations.py`: add annotation files to .fif filtered files (after 2nd step of preprocessing).
+  - **input**:
+    - annotations files (saved in './outputs/annotations_bad_no_stim') .
+    - raw .fif files (after maxfilter and frequency filter preprecessing steps). Directory: e.g for subject 01 would be 'outputs/DEAP-bids/derivatives/mne-bids-pipeline/sub-01/eeg/sub-01_task-rest_proc-filt_raw.fif'.
+  - **output**: raw .fif files (after maxfilter and frequency filter preprocessing steps) with annotations (overwrite raw .fif files without annotations).
+- `add_channel_info_to_raw_data.py`: Add info to raw data files, i.e. rename channel names, set montage and add frequency of power line.
+  - **input:** .bdf files of DEAP data, that by default has to be saved in `./data` directory. 
+  - **output:** .fif files of DEAP data with info added to raw data, saved in `./data` directory. 

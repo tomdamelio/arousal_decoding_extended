@@ -1,4 +1,3 @@
-
 import argparse
 import os
 import pathlib
@@ -22,10 +21,11 @@ def convert_deap_to_bids(deap_data_dir, bids_save_dir, n_jobs=1, DEBUG=False):
     n_jobs : None | int
         Number of jobs for parallelization.
     """
-    subjects_ = subject_ids
-    
     if DEBUG:
         subjects_ = subject_ids[:1]
+    else:
+        subjects_ = subject_ids
+    
         
     if not bids_save_dir.exists():
         os.makedirs(bids_save_dir)
@@ -41,30 +41,8 @@ def _convert_subject(subject, data_path, bids_save_dir):
         fname = pathlib.Path(data_path) / f"s{subject}.bdf"    
         raw = mne.io.read_raw_bdf(fname)
         
-        # declare montage
-        montage = mne.channels.make_standard_montage(kind="biosemi32", head_size=0.095)   
-        
-        # Rename channel EDA 
-        raw.rename_channels(mapping={'GSR1': 'EDA'})        
-        # Rename other channels
-        raw.set_channel_types({'EXG1': 'eog',
-                                'EXG2': 'eog',
-                                'EXG3': 'eog',
-                                'EXG4': 'eog',
-                                'EXG5': 'emg',
-                                'EXG6': 'emg',
-                                'EXG7': 'emg',
-                                'EXG8': 'emg',
-                                'EDA': 'misc',
-                                'GSR2': 'misc',
-                                'Erg1': 'misc',
-                                'Erg2': 'misc',
-                                'Resp': 'misc',
-                                'Plet': 'misc',
-                                'Temp': 'misc'}) 
-
         subject_number = int(subject)
-
+        
         if subject_number > 28:
             raw.rename_channels(mapping={'-1': 'Status'})
             raw.drop_channels('-0')
@@ -74,10 +52,6 @@ def _convert_subject(subject, data_path, bids_save_dir):
             
         raw.set_channel_types({ 'Status': 'stim'})
         
-        raw.set_montage(montage)
-        
-        raw.info['line_freq'] = 50  # specify power line frequency as required by BIDS
-
         # Create events based on stim channel
         events = mne.find_events(raw, stim_channel='Status')
 
@@ -141,6 +115,3 @@ if __name__ == '__main__':
     
     print_dir_tree(args.deap_data_dir)
     print(make_report(args.deap_data_dir))
-
-
-

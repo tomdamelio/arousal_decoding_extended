@@ -73,7 +73,7 @@ def _convert_subject(subject, data_path, bids_save_dir):
         elif subject_number > 23:
             raw.rename_channels(mapping={'': 'Status'})
             
-        raw.set_channel_types({ 'Status': 'stim'})
+        #raw.set_channel_types({ 'Status': 'stim'})
         
         raw.set_montage(montage)
         
@@ -81,6 +81,8 @@ def _convert_subject(subject, data_path, bids_save_dir):
 
         # Create events based on stim channel
         events = mne.find_events(raw, stim_channel='Status')
+        
+        
 
         if subject_number < 24:
             event_id = {'rating_screen': 1,

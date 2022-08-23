@@ -73,7 +73,7 @@ def run_and_apply_ssp(subject, cfg):
     
     epochs = mne.read_epochs(epo_fname_in, proj=False)
     
-    epochs_cleaned = epochs.copy().add_proj(eog_projs).apply_proj()
+    epochs_cleaned = epochs.copy().pick_types(eeg = True).add_proj(eog_projs).apply_proj()
     
     epo_fname_out = epo_fname_in.copy().update(
         processing="SSP",
