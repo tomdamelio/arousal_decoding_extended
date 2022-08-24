@@ -12,6 +12,8 @@ python compute_ssp.py &&
 python compute_autoreject.py
 '''
 
+python convert_DEAP_to_bids.py && python create_bad_annotations.py && python add_annotations_and_channel_info_to_filt_data.py && python ../mne-bids-pipeline-main/run.py --config config_deap_eeg.py --steps=preprocessing/make_epochs && python ../mne-bids-pipeline-main/run.py --config config_deap_eeg.py --steps=preprocessing/ptp_reject && python compute_ssp.py && python compute_autoreject.py
+
 ## Main scripts
 
 - `convert_DEAP_to_bids.py`: Convert DEAP .bdf files into BIDS standard. Runs both on server and locally.
