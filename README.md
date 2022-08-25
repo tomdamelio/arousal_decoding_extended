@@ -47,6 +47,7 @@ python convert_DEAP_to_bids.py && python create_bad_annotations.py && python add
 
 - `check_len_stimuli_presentation.py`: check how many trials are detected after running `create_bad_annotations.py`.
 - `check_autorejected_epochs.ipynb`: check which epochs where rejected in a particular trial after running `compute_autoreject.py`.
+- `check_number_of_final_epochs_after_autoreject.py`
 
 ## Deprecated scripts
 

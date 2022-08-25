@@ -97,8 +97,8 @@ for dataset in datasets:
     N_JOBS = (n_jobs if n_jobs else cfg.N_JOBS)
 
     if DEBUG:
-        subjects = subjects[:1]
-        N_JOBS = 1
+        subjects = subjects[:3]
+        N_JOBS = 3
 
     print(f"computing autorejct on {dataset}")
     logging = Parallel(n_jobs=N_JOBS)(
