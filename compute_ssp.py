@@ -75,9 +75,8 @@ def run_and_apply_ssp(subject, cfg):
     
     epochs_cleaned = epochs.copy().pick_types(eeg = True).add_proj(eog_projs).apply_proj()
     
-    epo_fname_out = epo_fname_in.copy().update(
-        processing="SSP",
-    )
+    epo_fname_out = epo_fname_in.copy().update(processing="SSP")
+    
     epochs_cleaned.save(epo_fname_out, overwrite=True)
     return ok
 

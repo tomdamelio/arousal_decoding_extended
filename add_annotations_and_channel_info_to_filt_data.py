@@ -65,12 +65,20 @@ for i in subject_number:
         # add annotations to .fif files
         raw.set_annotations(annot_from_file)
         
+        # Filter EEG signal
         picks = mne.pick_types(raw.info, eeg=True, eog=False, stim=False, exclude='bads')
-        
         raw.notch_filter(np.arange(50, 250, 50), picks=picks, filter_length='auto',
                 phase='zero')
-        
         raw.filter(l_freq, h_freq)
+        
+        # Filter EDA signal
+        picks_EDA = mne.pick_channels(raw.info['ch_names'], include=['EDA'])
+        raw.filter(.05, 5., picks=picks_EDA)
+
+        #%%
+        # Filter EMG signal
+        picks_EMG = mne.pick_types(raw.info, emg = True)
+        raw.filter(20., None, picks=picks_EMG)
 
         # Export .fif files with annotations
         raw.save(fname = fname_fif, overwrite=True)

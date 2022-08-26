@@ -16,8 +16,8 @@ parser.add_argument(
     nargs='+',
     help='the dataset for which preprocessing should be computed')
 parser.add_argument(
-    '--n_jobs', type=int, default=1,
-    help='number of parallel processes to use (default: 1)')
+    '--n_jobs', type=int, default=4,
+    help='number of parallel processes to use (default: 4)')
 args = parser.parse_args()
 datasets = args.dataset
 n_jobs = args.n_jobs
@@ -97,7 +97,7 @@ for dataset in datasets:
     N_JOBS = (n_jobs if n_jobs else cfg.N_JOBS)
 
     if DEBUG:
-        subjects = subjects[:3]
+        subjects = subjects[1,2,3,24,26,30]
         N_JOBS = 3
 
     print(f"computing autorejct on {dataset}")

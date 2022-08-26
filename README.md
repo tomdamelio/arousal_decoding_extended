@@ -8,11 +8,13 @@ python ../mne-bids-pipeline-main/run.py --config config_deap_eeg.py --steps=prep
 python add_annotations_and_channel_info_to_filt_data.py &&
 python ../mne-bids-pipeline-main/run.py --config config_deap_eeg.py --steps=preprocessing/make_epochs &&
 python ../mne-bids-pipeline-main/run.py --config config_deap_eeg.py --steps=preprocessing/ptp_reject && # NOT USED, but genetate copied files that are used by further steps.
+python make_EDA_EMG_EOG_epochs.py &&
 python compute_ssp.py &&
 python compute_autoreject.py
 '''
 
-python convert_DEAP_to_bids.py && python create_bad_annotations.py && python add_annotations_and_channel_info_to_filt_data.py && python ../mne-bids-pipeline-main/run.py --config config_deap_eeg.py --steps=preprocessing/make_epochs && python ../mne-bids-pipeline-main/run.py --config config_deap_eeg.py --steps=preprocessing/ptp_reject && python compute_ssp.py && python compute_autoreject.py
+
+python convert_DEAP_to_bids.py && python create_bad_annotations.py && python ../mne-bids-pipeline-main/run.py --config config_deap_eeg.py --steps=preprocessing/frequency_filter && python add_annotations_and_channel_info_to_filt_data.py && python ../mne-bids-pipeline-main/run.py --config config_deap_eeg.py --steps=preprocessing/make_epochs && python ../mne-bids-pipeline-main/run.py --config config_deap_eeg.py --steps=preprocessing/ptp_reject && python make_EDA_EMG_EOG_epochs.py && python compute_ssp.py && python compute_autoreject.py
 
 ## Main scripts
 
@@ -28,7 +30,7 @@ python convert_DEAP_to_bids.py && python create_bad_annotations.py && python add
   - **input**:
     - annotations files (saved in './outputs/annotations_bad_no_stim') .
     - raw .fif files (after maxfilter and frequency filter preprecessing steps). Directory: e.g for subject 01 would be 'outputs/DEAP-bids/derivatives/mne-bids-pipeline/sub-01/eeg/sub-01_task-rest_proc-filt_raw.fif'.
-  - **output**: raw .fif files (after maxfilter and frequency filter preprocessing steps) with annotations (overwrite raw .fif files without annotations) and cannel info added. EEG + EDA (+ other channels).
+  - **output**: same raw .fif files (after frequency filter preprocessing steps) with annotations (overwrite raw .fif files without annotations) and cannel info added. EEG + EDA (+ other channels).
 
 
 - `compute_ssp.py`: detect and remove EOG artifacts from preprocessed data
