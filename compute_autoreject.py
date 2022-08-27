@@ -25,7 +25,7 @@ if datasets is None:
     datasets = list(DATASETS)
 print(f"Datasets: {', '.join(datasets)}")
 
-DEBUG = False
+DEBUG = True
 
 def run_subject(subject, cfg):
     deriv_root = cfg.deriv_root
@@ -97,7 +97,7 @@ for dataset in datasets:
     N_JOBS = (n_jobs if n_jobs else cfg.N_JOBS)
 
     if DEBUG:
-        subjects = subjects[1,2,3,24,26,30]
+        subjects = subjects[:3]
         N_JOBS = 3
 
     print(f"computing autorejct on {dataset}")

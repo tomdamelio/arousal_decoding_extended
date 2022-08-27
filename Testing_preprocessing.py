@@ -102,3 +102,109 @@ epo.info
 %matplotlib
 epo.plot(picks=['EXG5', 'EXG6', 'EXG7', 'EXG8'])
 # %%
+### Reject autorejeted Epochs in EDA EMG and EOG ###
+import mne 
+from mne_bids import BIDSPath
+import config_deap_eeg as cfg
+from numpy import load
+import autoreject
+subject = '01'
+
+bids_path = BIDSPath(subject=subject,
+                    session=None,
+                    task=cfg.task,
+                    datatype=cfg.data_type,
+                    extension='.fif',
+                    root=cfg.deriv_root)
+
+# Load EDA epochs
+epochsEDA_fname = bids_path.copy().update(processing='EDA',
+                                            suffix='epo',
+                                            check=False)
+
+epochsEDA = mne.read_epochs(epochsEDA_fname, proj=False)
+
+# Load EMG epochs
+epochsEMG_fname = bids_path.copy().update(processing='EMG',
+                                            suffix='epo',
+                                            check=False)  
+epochsEMG = mne.read_epochs(epochsEMG_fname, proj=False)
+
+# Load EOG epochs
+epochsEOG_fname = bids_path.copy().update(processing='EOG',
+                                            suffix='epo',
+                                            check=False)   
+epochsEOG = mne.read_epochs(epochsEOG_fname, proj=False)
+
+# Load numpy array with autorejected epochs
+reject_log_data = load('./outputs/DEAP-bids/derivatives/mne-bids-pipeline/sub-' + subject + '/eeg/sub-' + subject + '_task-rest_proc-logsAutoreject_epo.npz')
+reject_log = autoreject.autoreject.RejectLog(bad_epochs=reject_log_data['bad_epochs'],
+                                            labels=reject_log_data['labels'],
+                                            ch_names=reject_log_data['ch_names'])
+bad_epochs = reject_log.bad_epochs
+bad_epochs_inv = []
+for annot in range(len(bad_epochs-1)):
+    if bad_epochs[annot] == True:
+        bad_epochs_inv.append(False)
+    elif bad_epochs[annot] == False:
+        bad_epochs_inv.append(True)
+
+# %%
+### Chequear que el len de las epocas de EDA (EMG y EOG) coincidan con las de EEG
+import mne 
+from mne_bids import BIDSPath
+import config_deap_eeg as cfg
+from numpy import load
+import autoreject
+n_epochs={}
+subjects=['01','02', '03']
+for subject in subjects:
+
+    bids_path = BIDSPath(subject=subject,
+                        session=None,
+                        task=cfg.task,
+                        datatype=cfg.data_type,
+                        extension='.fif',
+                        root=cfg.deriv_root)
+
+    # Load EEG epochs
+    epochsEEG_fname = bids_path.copy().update(processing='autoreject',
+                                                suffix='epo',
+                                                check=False)
+
+    epochsEEG = mne.read_epochs(epochsEEG_fname, proj=False)
+
+    len_epochsEEG = len(epochsEEG)
+    
+
+    # Load EDA epochs
+    epochsEDA_fname = bids_path.copy().update(processing='EDA',
+                                                suffix='epoRejected',
+                                                check=False)
+
+    epochsEDA = mne.read_epochs(epochsEDA_fname, proj=False)
+
+    len_epochsEDA = len(epochsEDA)
+
+    # Load EDA epochs
+    epochsEMG_fname = bids_path.copy().update(processing='EMG',
+                                                suffix='epoRejected',
+                                                check=False)
+
+    epochsEMG = mne.read_epochs(epochsEMG_fname, proj=False)
+
+    len_epochsEMG = len(epochsEMG)
+
+    # Load EDA epochs
+    epochsEOG_fname = bids_path.copy().update(processing='EMG',
+                                                suffix='epoRejected',
+                                                check=False)
+
+    epochsEOG = mne.read_epochs(epochsEMG_fname, proj=False)
+
+    len_epochsEOG = len(epochsEMG)
+
+    n_epochs[subject] = [len_epochsEEG, len_epochsEDA, len_epochsEMG, len_epochsEOG]
+
+    
+# %%

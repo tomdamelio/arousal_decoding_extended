@@ -8,14 +8,13 @@ from joblib import Parallel, delayed
 import mne
 from mne_bids import BIDSPath
 import coffeine
-from mne_features.feature_extraction import extract_features
 from mne.minimum_norm import apply_inverse_cov
 import h5io
 
 from utils import prepare_dataset
 
 DATASETS = ['deap']
-FEATURE_TYPE = ['fb_covs', 'handcrafted']
+FEATURE_TYPE = ['fb_covs']
 parser = argparse.ArgumentParser(description='Compute features.')
 parser.add_argument(
     '-d', '--dataset',
@@ -27,8 +26,8 @@ parser.add_argument(
     default=None,
     nargs='+', help='Type of features to compute')
 parser.add_argument(
-    '--n_jobs', type=int, default=1,
-    help='number of parallel processes to use (default: 1)')
+    '--n_jobs', type=int, default=4,
+    help='number of parallel processes to use (default: 4)')
 
 args = parser.parse_args()
 datasets = args.dataset
@@ -46,60 +45,25 @@ for dataset, feature_type in tasks:
         raise ValueError(f"The benchmark '{feature_type}' passed is unkonwn")
 print(f"Running benchmarks: {', '.join(feature_types)}")
 print(f"Datasets: {', '.join(datasets)}")
+
 DEBUG = False
+
 frequency_bands = {
     "delta": (0.1, 4.0),
     "theta": (4.0, 8.0),
     "alpha": (8.0, 14.0),
     "beta": (14.0, 30.0),
-    "gamma_low": (30.0, 49.0),
-}
-hc_selected_funcs = [
-    'std',
-    'kurtosis',
-    'skewness',
-    'quantile',
-    'ptp_amp',
-    'mean',
-    'pow_freq_bands',
-    'spect_entropy',
-    'app_entropy',
-    'samp_entropy',
-    'svd_entropy',
-    'hurst_exp',
-    'hjorth_complexity',
-    'hjorth_mobility',
-    'line_length',
-    'wavelet_coef_energy',
-    'higuchi_fd',
-    'zero_crossings',
-    'svd_fisher_info'
-]
-hc_func_params = {
-    'quantile__q': [0.1, 0.25, 0.75, 0.9],
-    'pow_freq_bands__freq_bands': [0, 2, 4, 8, 13, 18, 24, 30, 49],
-    'pow_freq_bands__ratios': 'all',
-    'pow_freq_bands__ratios_triu': True,
-    'pow_freq_bands__log': True,
-    'pow_freq_bands__normalize': None,
+    "gamma": (30.0, 80.0),
 }
 
 def extract_fb_covs(epochs, condition):
     features, meta_info = coffeine.compute_features(
-        epochs[condition], features=('covs',), n_fft=1024, n_overlap=512,
-        fs=epochs.info['sfreq'], fmax=49, frequency_bands=frequency_bands)
+        epochs[condition],
+        features=('covs'),
+        fmax=80.,
+        frequency_bands=frequency_bands)
     features['meta_info'] = meta_info
     return features
-
-
-def extract_handcrafted_feats(epochs, condition):
-    features = extract_features(
-        epochs[condition].get_data(), epochs.info['sfreq'], hc_selected_funcs,
-        funcs_params=hc_func_params, n_jobs=1, ch_names=epochs.ch_names,
-        return_as_df=False)
-    out = {'feats': features}
-    return out
-
 
 def run_subject(subject, cfg, condition):
     task = cfg.task
@@ -129,13 +93,6 @@ def run_subject(subject, cfg, condition):
     try:
         if feature_type == 'fb_covs':
             out = extract_fb_covs(epochs, condition)
-        elif feature_type == 'handcrafted':
-            out = extract_handcrafted_feats(epochs, condition)
-        elif feature_type == 'source_power':
-            covs = extract_fb_covs(epochs, condition)
-            covs = covs['covs']
-            out = extract_source_power(
-                bp, epochs.info, subject, cfg.subjects_dir, covs)
         else:
             NotImplementedError()
     except Exception as err:
@@ -149,11 +106,9 @@ for dataset, feature_type in tasks:
     cfg, subjects = prepare_dataset(dataset)
     N_JOBS = cfg.N_JOBS if not n_jobs else n_jobs
     if DEBUG:
-        subjects = subjects[:1]
+        subjects = subjects[:3]
         N_JOBS = 1
-        frequency_bands = {"alpha": (8.0, 15.0)}
-        hc_selected_funcs = ['std']
-        hc_func_params = dict()
+        #frequency_bands = {"alpha": (8.0, 14.0)}
 
     for condition in cfg.feature_conditions:
         print(
@@ -165,13 +120,7 @@ for dataset, feature_type in tasks:
         out = {sub: ff for sub, ff in zip(subjects, features)
                if not isinstance(ff, str)}
 
-        label = None
-        if dataset in ("chbp", "lemon"):
-            label = 'pooled'
-            if '/' in condition:
-                label = f'eyes-{condition.split("/")[1]}'
-        elif dataset in ("tuab", 'camcan'):
-            label = 'rest'
+        label = 'rest'
 
         out_fname = cfg.deriv_root / f'features_{feature_type}_{label}.h5'
         log_out_fname = (

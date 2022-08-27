@@ -7,3 +7,4 @@ for item in lst:
     print(item)
     print(data[item])
 # %%
+

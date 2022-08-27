@@ -32,6 +32,12 @@ python convert_DEAP_to_bids.py && python create_bad_annotations.py && python ../
     - raw .fif files (after maxfilter and frequency filter preprecessing steps). Directory: e.g for subject 01 would be 'outputs/DEAP-bids/derivatives/mne-bids-pipeline/sub-01/eeg/sub-01_task-rest_proc-filt_raw.fif'.
   - **output**: same raw .fif files (after frequency filter preprocessing steps) with annotations (overwrite raw .fif files without annotations) and cannel info added. EEG + EDA (+ other channels).
 
+- `make_EDA_EMG_EOG_epochs.py`: make EDA EMG and EOG epochs
+  - **input**: clean epochs (.fif files). e.g for subject 01 would be 'outputs/DEAP-bids/derivatives/mne-bids-pipeline/sub-01/eeg/sub-01_task-rest_proc-clean_epo.fif'
+  - **output**: 
+    - EDA epochs -> ./outputs/DEAP-bids/derivatives/mne-bids-pipeline/sub-01/eeg/sub-01_task-rest_proc-EDA_epo.fif  
+    - EMG epochs -> ./outputs/DEAP-bids/derivatives/mne-bids-pipeline/sub-01/eeg/sub-01_task-rest_proc-EMG_epo.fif  
+    - EOG epochs -> ./outputs/DEAP-bids/derivatives/mne-bids-pipeline/sub-01/eeg/sub-01_task-rest_proc-EOG_epo.fif  
 
 - `compute_ssp.py`: detect and remove EOG artifacts from preprocessed data
   - **input**:
@@ -42,8 +48,24 @@ python convert_DEAP_to_bids.py && python create_bad_annotations.py && python ../
 - `compute_autoreject.py`: compute local version of autoreject.
   - **input**: clean epochs after SSP (.fif files). e.g for subject 01 would be 'outputs/DEAP-bids/derivatives/mne-bids-pipeline/sub-01/eeg/sub-01_task-rest_proc-SSP_epo.fif'
   - **output**:
-    - clean epoch files after SSP and autoreject (.fif files). e.g. for subject 01 would be 'outputs/DEAP-bids/derivatives/mne-bids-pipeline/sub-01/eeg/sub-01_task-rest_proc-autoreject_epo.fif'
+    - clean epoch files after SSP and autoreject (.fif files). e.g. for subject 01 would be 'outputs/DEAP-bids/derivatives/mne-bids-pipeline/sub-01/eeg/sub-01_task-rest_proc-epoAutoreject.fif'
     - log files indicating epochs that were rejected after running autoreject (.npz files). e.g. for subject 01 would be 'outputs/DEAP-bids/derivatives/mne-bids-pipeline/sub-01/eeg/sub-01_task-rest_proc-logsAutoreject_epo.npz'. We can analyze them using `check_autorejected_epochs.ipynb`
+
+- `reject_autorejected_epochs_EDA_EMG_EOG.py`: Reject autorejected epochs during EEG prepocessign in peripheral measures
+  - **input**: 
+    - EDA epochs -> ./outputs/DEAP-bids/derivatives/mne-bids-pipeline/sub-01/eeg/sub-01_task-rest_proc-EDA_epoRejected.fif  
+    - EMG epochs -> ./outputs/DEAP-bids/derivatives/mne-bids-pipeline/sub-01/eeg/sub-01_task-rest_proc-EMG_epoRejected.fif  
+    - EOG epochs -> ./outputs/DEAP-bids/derivatives/mne-bids-pipeline/sub-01/eeg/sub-01_task-rest_proc-EOG_epoRejected.fif 
+    - Numpy array with logs of autorejected epochs
+  - **output**: 
+    - EDA epochs after autoreject -> ./outputs/DEAP-bids/derivatives/mne-bids-pipeline/sub-01/eeg/sub-01_task-rest_proc-EDA_epoRejected.fif  
+    - EMG epochs after autoreject -> ./outputs/DEAP-bids/derivatives/mne-bids-pipeline/sub-01/eeg/sub-01_task-rest_proc-EMG_epoRejected.fif  
+    - EOG epochs after autoreject -> ./outputs/DEAP-bids/derivatives/mne-bids-pipeline/sub-01/eeg/sub-01_task-rest_proc-EOG_epoRejected.fif 
+
+
+- `compute_eeg_features.py`: compute cov features after autoreject.
+  - **input**: clean epoch files after SSP and autoreject (.fif files). e.g. for subject 01 would be 'outputs/DEAP-bids/derivatives/mne-bids-pipeline/sub-01/eeg/sub-01_task-rest_proc-epoAutoreject.fif'
+  - **output**: covariance features (.h5 file of all subjects in a dict format. Saved in outputs\DEAP-bids\derivatives\mne-bids-pipeline)
 
 ## Auxiliar scripts
 
