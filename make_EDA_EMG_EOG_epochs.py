@@ -27,11 +27,11 @@ print(f"Datasets: {', '.join(datasets)}")
 
 DEBUG = False
 
-def make_EDA_and_EMG_epochs(subject, cfg):
+def make_EDA_EMG_and_EOG_epochs(subject, cfg):
     
     ok = 'OK'
     
-    ### Make Epochs EDA & EMG ###
+    ### Make Epochs EDA, EMG and EOG epochs ###
     bids_path = BIDSPath(subject=subject,
                          session=None,
                          task=cfg.task,
@@ -72,6 +72,6 @@ for dataset in datasets:
         subjects = subjects[:1]
         N_JOBS = 1
 
-    print(f"Computing EDA and EMG epochs on {dataset}")
+    print(f"Computing EDA, EMG and EOG epochs on {dataset}")
     logging = Parallel(n_jobs=N_JOBS)(
-        delayed(make_EDA_and_EMG_epochs)(sub.split('-')[1], cfg) for sub in subjects)
+        delayed(make_EDA_EMG_and_EOG_epochs)(sub.split('-')[1], cfg) for sub in subjects)

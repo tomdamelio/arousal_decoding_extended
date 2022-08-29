@@ -12,8 +12,8 @@ import h5io
 from utils import prepare_dataset
 
 DATASETS = ['deap']
-FEATURE_TYPE = ['fb_covs']
-parser = argparse.ArgumentParser(description='Compute features EEG.')
+FEATURE_TYPE = ['EDA', 'EMG', 'EOG']
+parser = argparse.ArgumentParser(description='Compute features EDA EMG EOG.')
 parser.add_argument(
     '-d', '--dataset',
     default=None,
@@ -24,7 +24,7 @@ parser.add_argument(
     default=None,
     nargs='+', help='Type of features to compute')
 parser.add_argument(
-    '--n_jobs', type=int, default=8,
+    '--n_jobs', type=int, default=4,
     help='number of parallel processes to use (default: 4)')
 
 args = parser.parse_args()
@@ -44,29 +44,23 @@ for dataset, feature_type in tasks:
 print(f"Running benchmarks: {', '.join(feature_types)}")
 print(f"Datasets: {', '.join(datasets)}")
 
-DEBUG = False
+DEBUG = True
 
-frequency_bands = {
-    "delta": (0.1, 4.0),
-    "theta": (4.0, 8.0),
-    "alpha": (8.0, 14.0),
-    "beta": (14.0, 30.0),
-    "gamma": (30.0, 80.0),
-}
+####### COMPLETE THIS FUNCTION #######
+# SEGUIR DESDE ACA -> USAR LAS FUNCIONES QUE USE PARA MI TESIS PARA SACAR LA FEATURES DE LAS MEDIDAS FISIOLOGICAS
+# BUSCAR COMO HIZO TAMBIEN DENIS PARA OBTENER FEATURES HADNCRAFT
+def extract_EDA_measures(epochs):
+    EDA_features = ...
+    return EDA_features
 
-def extract_fb_covs(epochs, condition):
-    if DEBUG:
-        epochs = epochs[:30]
-    covs = list()
-    for ii in range(len(epochs)):
-        features, meta_info = coffeine.compute_features(
-            epochs[condition][ii],
-            features=('covs'),
-            fmax=80.,
-            frequency_bands=frequency_bands)
-        covs.append([c for c in features['covs']])
-    features['meta_info'] = meta_info
-    return covs
+def extract_EMG_measures(epochs):
+    EMG_features = ...
+    return EMG_features
+
+def extract_EOG_measures(epochs):
+    EOG_features = ...
+    return EOG_features
+######################################
 
 def run_subject(subject, cfg, condition):
     task = cfg.task
@@ -77,9 +71,9 @@ def run_subject(subject, cfg, condition):
         session = session.lstrip('ses-')
 
     bp_args = dict(root=deriv_root, subject=subject,
-                    datatype=data_type, processing="autoreject",
+                    datatype=data_type, processing=feature_type,
                     task=task,
-                    check=False, suffix="epo")
+                    check=False, suffix="epoRejected")
     if session:
         bp_args['session'] = session
     bp = BIDSPath(**bp_args)
@@ -92,10 +86,17 @@ def run_subject(subject, cfg, condition):
         return 'condition not found'
     out = None
     # make sure that no EOG/ECG made it into the selection
-    epochs.pick_types(**{data_type: True})
+    
     try:
-        if feature_type == 'fb_covs':
-            out = extract_fb_covs(epochs, condition)
+        if feature_type == 'EDA':       
+            epochs = epochs.copy().pick_channels(ch_names=['EDA'])
+            out = extract_EDA_measures(epochs)
+        elif feature_type == 'EMG':
+            epochs = epochs.copy().pick_types(emg=True)
+            out = extract_EMG_measures(epochs)
+        elif feature_type == 'EOG':
+            epochs = epochs.copy().pick_types(eog=True)
+            out = extract_EOG_measures(epochs)
         else:
             NotImplementedError()
     except Exception as err:
@@ -121,7 +122,7 @@ for dataset, feature_type in tasks:
             condition=condition) for sub in subjects)
 
         out = {sub: ff for sub, ff in zip(subjects, features)
-                if not isinstance(ff, str)}
+               if not isinstance(ff, str)}
 
         label = 'rest'
 
@@ -137,7 +138,7 @@ for dataset, feature_type in tasks:
         print(f'Features saved under {out_fname}.')
 
         logging = ['OK' if not isinstance(ff, str) else ff for sub, ff in
-                    zip(subjects, features)]
+                   zip(subjects, features)]
         out_log = pd.DataFrame({"ok": logging, "subject": subjects})
         out_log.to_csv(log_out_fname)
         print(f'Log saved under {log_out_fname}.')
