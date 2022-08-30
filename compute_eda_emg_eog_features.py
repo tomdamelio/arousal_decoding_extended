@@ -1,3 +1,4 @@
+#%%
 import argparse
 from multiprocessing import Value
 
@@ -44,14 +45,23 @@ for dataset, feature_type in tasks:
 print(f"Running benchmarks: {', '.join(feature_types)}")
 print(f"Datasets: {', '.join(datasets)}")
 
+#%%
+
 DEBUG = True
 
 ####### COMPLETE THIS FUNCTION #######
 # SEGUIR DESDE ACA -> USAR LAS FUNCIONES QUE USE PARA MI TESIS PARA SACAR LA FEATURES DE LAS MEDIDAS FISIOLOGICAS
 # BUSCAR COMO HIZO TAMBIEN DENIS PARA OBTENER FEATURES HADNCRAFT
 def extract_EDA_measures(epochs):
-    EDA_features = ...
-    return EDA_features
+    # 
+    if DEBUG:
+        #epochs = epochs[:30]
+    covs = list()
+    for ii in range(len(epochs)):
+        features = ...  
+        covs.append([c for c in features['covs']])
+    features['meta_info'] = meta_info
+    return EDA_features # # should be len(epochs) x (2) n_features (meanEDA and VarEDA)
 
 def extract_EMG_measures(epochs):
     EMG_features = ...

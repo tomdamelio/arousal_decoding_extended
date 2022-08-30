@@ -55,8 +55,6 @@ frequency_bands = {
 }
 
 def extract_fb_covs(epochs, condition):
-    if DEBUG:
-        epochs = epochs[:30]
     covs = list()
     for ii in range(len(epochs)):
         features, meta_info = coffeine.compute_features(
@@ -110,7 +108,7 @@ for dataset, feature_type in tasks:
     N_JOBS = cfg.N_JOBS if not n_jobs else n_jobs
     if DEBUG:
         subjects = subjects[:3]
-        N_JOBS = 1
+        N_JOBS = 4
         #frequency_bands = {"alpha": (8.0, 14.0)}
 
     for condition in cfg.feature_conditions:
