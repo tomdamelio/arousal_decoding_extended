@@ -47,14 +47,12 @@ print(f"Running benchmarks: {', '.join(feature_types)}")
 print(f"Datasets: {', '.join(datasets)}")
 
 
-DEBUG = False
+DEBUG = True
 
 def extract_EDA_measures(epochs):
     # Input -> EpochsEDA
     # Output -> n_epochs x 2 features (meanEDA and varEDA)
     EDA_features = {}
-    if DEBUG:
-        epochs = epochs[:30]
     EDA_mean = epochs.get_data().mean(axis=2)[:, 0]
     EDA_var = epochs.get_data().var(axis=2)[:, 0]  
     EDA_features['meanEDA'] = EDA_mean
@@ -66,8 +64,6 @@ def extract_EMG_measures(epochs):
     # Output -> n_epochs x 2 features (meanEMG and varEMG)
     epochs = epochs.copy().pick_channels(['EXG5','EXG6'])
     EMG_features = {}
-    if DEBUG:
-        epochs = epochs[:30]
 
     # EMG activity = EMG z1 - EMG z2
     emg = epochs.get_data()
@@ -85,8 +81,6 @@ def extract_EOG_measures(epochs):
     # Input -> EpochsEOG
     # Output -> n_epochs x 8 features (meanEOG and varEOG)
 
-    if DEBUG:
-        epochs = epochs[:30]
     EOG_mean = epochs.get_data().mean(axis=2) # keep 4 EOG means
     EOG_var = epochs.get_data().var(axis=2) # keep 4 EOG vars
     EOG_features_ndarray = np.hstack((EOG_mean,EOG_var))
