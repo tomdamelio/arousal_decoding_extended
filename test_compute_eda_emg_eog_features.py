@@ -83,3 +83,48 @@ def extract_EOG_measures(epochs):
         EOG_features[key] = np.array(value)
     return EOG_features # # should be len(epochs) x (8) n_features (meanEOG and VarEOG)
 # %%
+# Test read data output
+# Pruebo abrir cov matrices de mi tesis
+import h5io
+import numpy as np
+import pandas as pd
+import importlib
+
+dataset =  'deap'
+config_map = {'deap': "config_deap_eeg"}
+
+
+cfg = importlib.import_module(config_map[dataset])
+bids_root = cfg.bids_root
+deriv_root = cfg.deriv_root
+analyze_channels = cfg.analyze_channels
+
+condition = 'rest'
+FEATURE_TYPE = 'EDA'
+
+df_subjects = pd.read_csv(bids_root / "participants.tsv", sep='\t')
+df_subjects = df_subjects.set_index('participant_id')
+df_subjects = df_subjects.sort_index()  
+
+features = h5io.read_hdf5(
+    deriv_root / f'features_{FEATURE_TYPE}_{condition}.h5')
+
+#%%
+eda_features = list()
+subjects = df_subjects.index.values
+subjects = subjects.tolist()
+
+
+DEBUG = True
+if DEBUG:
+    subjects = ['sub-01','sub-02','sub-03']
+    
+dict_features = {}    
+
+for sub in subjects:
+    eda_features = [features[sub]]
+    X_eda_features= np.array([cc for cc in eda_features])
+    X_eda_features = np.squeeze(X_eda_features, axis=0)  
+    if DEBUG:
+        X_cov = X_cov[:30,:,:,:]
+    dict_features[sub] = X_cov  

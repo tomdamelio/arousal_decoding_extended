@@ -8,7 +8,7 @@ from joblib import Parallel, delayed
 
 import mne
 from mne_bids import BIDSPath
-import coffeine
+
 import h5io
 
 from utils import prepare_dataset
@@ -46,9 +46,8 @@ for dataset, feature_type in tasks:
 print(f"Running benchmarks: {', '.join(feature_types)}")
 print(f"Datasets: {', '.join(datasets)}")
 
-#%%
 
-DEBUG = True
+DEBUG = False
 
 def extract_EDA_measures(epochs):
     # Input -> EpochsEDA
@@ -58,8 +57,8 @@ def extract_EDA_measures(epochs):
         epochs = epochs[:30]
     EDA_mean = epochs.get_data().mean(axis=2)[:, 0]
     EDA_var = epochs.get_data().var(axis=2)[:, 0]  
-    EDA_features['mean'] = EDA_mean
-    EDA_features['var'] = EDA_var
+    EDA_features['meanEDA'] = EDA_mean
+    EDA_features['varEDA'] = EDA_var
     return EDA_features 
 
 def extract_EMG_measures(epochs):
@@ -77,8 +76,8 @@ def extract_EMG_measures(epochs):
     
     emg_delta = emgz1 - emgz2
     
-    EMG_features['mean']  = emg_delta.mean(axis=1)
-    EMG_features['var'] = emg_delta.var(axis=1)        
+    EMG_features['meanEDA']  = emg_delta.mean(axis=1)
+    EMG_features['varEDA'] = emg_delta.var(axis=1)        
 
     return EMG_features 
 
