@@ -45,8 +45,8 @@ for sub in subjects:
     covs = [features[sub]]
     X_cov = np.array([cc for cc in covs])
     X_cov = np.squeeze(X_cov, axis=0)  
-    #if DEBUG:
-        #X_cov = X_cov[:30,:,:,:]
+    if DEBUG:
+        X_cov = X_cov[:30,:,:,:]
     dict_features[sub] = X_cov  
 
 #%%        
