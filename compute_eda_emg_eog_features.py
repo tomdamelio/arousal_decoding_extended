@@ -47,7 +47,7 @@ print(f"Running benchmarks: {', '.join(feature_types)}")
 print(f"Datasets: {', '.join(datasets)}")
 
 
-DEBUG = True
+DEBUG = False
 
 def extract_EDA_measures(epochs):
     # Input -> EpochsEDA
@@ -122,6 +122,8 @@ def run_subject(subject, cfg, condition):
     try:
         if feature_type == 'EDA':       
             epochs = epochs.copy().pick_channels(ch_names=['EDA'])
+            if int(subject.strip('sub-')) > 22:
+                epochs.apply_function(fun=lambda x: 10**9/x)
             out = extract_EDA_measures(epochs)
         elif feature_type == 'EMG':
             epochs = epochs.copy().pick_types(emg=True)

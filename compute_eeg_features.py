@@ -24,8 +24,8 @@ parser.add_argument(
     default=None,
     nargs='+', help='Type of features to compute')
 parser.add_argument(
-    '--n_jobs', type=int, default=8,
-    help='number of parallel processes to use (default: 4)')
+    '--n_jobs', type=int, default=-1,
+    help='number of parallel processes to use (default: Max jobs)')
 
 args = parser.parse_args()
 datasets = args.dataset

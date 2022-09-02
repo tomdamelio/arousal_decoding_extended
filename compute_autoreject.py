@@ -16,8 +16,8 @@ parser.add_argument(
     nargs='+',
     help='the dataset for which preprocessing should be computed')
 parser.add_argument(
-    '--n_jobs', type=int, default=4,
-    help='number of parallel processes to use (default: 4)')
+    '--n_jobs', type=int, default=-1,
+    help='number of parallel processes to use (default: Max Jobs)')
 args = parser.parse_args()
 datasets = args.dataset
 n_jobs = args.n_jobs
@@ -25,7 +25,7 @@ if datasets is None:
     datasets = list(DATASETS)
 print(f"Datasets: {', '.join(datasets)}")
 
-DEBUG = True
+DEBUG = False
 
 def run_subject(subject, cfg):
     deriv_root = cfg.deriv_root
