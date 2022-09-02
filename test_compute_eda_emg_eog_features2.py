@@ -1,18 +1,45 @@
-#%%epare_dataset
+#%%
 import argparse
 from multiprocessing import Value
 
 import numpy as np
 import pandas as pd
+from matplotlib import pyplot as plt 
 from joblib import Parallel, delayed
 
 import mne
 from mne_bids import BIDSPath
 
 import h5io
+import importlib
 
 from utils import prepare_dataset
 
+#%%
+bp = 'C:/Users/dadam/arousal_project/arousal_decoding_extended/outputs/DEAP-bids/derivatives/mne-bids-pipeline/sub-01/eeg/sub-01_task-rest_proc-EDA_epoRejected.fif'
+epochs = mne.read_epochs(bp,
+                         proj=False,
+                         preload=True)
+
+epochs = epochs.copy().pick_channels(ch_names=['EDA'])
+
+#%%
+EDA_var = epochs.get_data().var(axis=2)[:, 0]  
+#%%
+plt.plot(EDA_var)
+
+#%%
+# Obtain plots from las script
+fig, ax = plt.subplots(1, 1, figsize=[20, 8])
+times = [i for i in range(len(EDA_var))]
+ax.plot(times, EDA_var, color='r', alpha = 0.5, label=f'True EDA')
+ax.set_xlabel('Time (epochs)')
+ax.set_ylabel(f'EDA Var')
+ax.set_title(f'Plot test')
+plt.legend()
+
+
+#%%
 DATASETS = ['deap']
 FEATURE_TYPE = ['EDA', 'EMG', 'EOG']
 parser = argparse.ArgumentParser(description='Compute features EDA EMG EOG.')
@@ -46,6 +73,7 @@ for dataset, feature_type in tasks:
 print(f"Running benchmarks: {', '.join(feature_types)}")
 print(f"Datasets: {', '.join(datasets)}")
 
+#%%
 
 DEBUG = True
 

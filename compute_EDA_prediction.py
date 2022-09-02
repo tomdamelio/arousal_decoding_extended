@@ -11,11 +11,8 @@ import pandas as pd
 from coffeine import make_filter_bank_regressor
 from joblib import Parallel, delayed
 from sklearn.linear_model import GammaRegressor, RidgeCV
-from sklearn.model_selection import (GridSearchCV, KFold,
-                                    cross_val_predict,
-                                    cross_val_score)
-
-from subject_number import subject_number as subjects
+from sklearn.model_selection import (GridSearchCV, KFold, cross_val_predict,
+                                     cross_val_score)
 
 dataset =  'deap'
 config_map = {'deap': "config_deap_eeg"}
@@ -28,7 +25,7 @@ analyze_channels = cfg.analyze_channels
 condition = 'rest'
 feature_label = 'fb_covs'
 
-###  SET CONFIGS ###
+#########  SET CONFIGS #########
 
 # eda or emg?    
 measure = 'eda'
@@ -36,10 +33,15 @@ measure = 'eda'
 y_stat = 'var'
 
 DEBUG = True
-####################
+
+################################
 
 
-derivative_path = cfg.deriv_root
+derivative_path = deriv_root 
+pred_path = derivative_path / f'{measure}_predictions'
+
+#%%
+
 
 date = datetime.datetime.now().strftime("%d-%m--%H-%M")    
 n_components = np.arange(1, 32, 1)
@@ -57,6 +59,7 @@ freqs = {
     "gamma": (30.0, 80.0),
 }
 
+#if y_stat == 'mean' or measure == 'eda':
 if y_stat == 'mean' or measure == 'eda':
     estimator_type = RidgeCV(alphas=np.logspace(-3, 5, 100))
 else:
@@ -93,13 +96,6 @@ pipelines = {'riemann': make_filter_bank_regressor(
                 vectorization_params=None,
                 estimator=estimator_type)}
 
-if DEBUG:
-    n_jobs = 4
-    subjects = ['01','02','03']
-    debug_out = '_DEBUG'
-else:
-    debug_out = ''
-
 def run_low_rank(n_components, X, y, estimators, cv, scoring):   
     out = dict(n_components=n_components)
     for key, estimator in estimators.items():
@@ -123,13 +119,15 @@ features_X = h5io.read_hdf5(deriv_root / f'features_{feature_label}_{condition}.
 features_y = h5io.read_hdf5(deriv_root / f'features_EDA_{condition}.h5')
 
 covs = list()
-subjects = df_subjects.index.values
-subjects = subjects.tolist()
 
-
-DEBUG = False
 if DEBUG:
     subjects = ['sub-01','sub-02','sub-03']
+    n_jobs = 4
+    debug_out = '_DEBUG'
+else:
+    subjects = df_subjects.index.values
+    subjects = subjects.tolist()
+    debug_out = ''
     
 dict_features = {}    
 
@@ -144,13 +142,13 @@ for subject in subjects:
         {band: list(X_cov[:, ii]) for ii, band in
         enumerate(freqs)})
     
-    ###### read peripheral feauteres -> X #####
+    ###### read peripheral features -> X #####
 
     # Read EDA data
     eda_features = [features_y[subject]]
     X_eda_features= np.array([cc for cc in eda_features])
     X_eda_features = np.squeeze(X_eda_features, axis=0)  
-    y = eda_features[0]['meanEDA']
+    y = eda_features[0]['varEDA']
 
 
     low_rank_estimators = {k: v for k, v in pipelines.items()
@@ -172,13 +170,12 @@ for subject in subjects:
         out_frames.append(this_df)
     out_df = pd.concat(out_frames)
     
-    opt_dir = op.join(derivative_path, measure + '_opt--' + date + '-' + y_stat)
+    opt_dir = op.join(pred_path, date, measure + '_' + y_stat + '_opt--' + date)
     if not os.path.exists(opt_dir):
         os.makedirs(opt_dir)
     
-    out_df.to_csv(op.join(derivative_path, measure + '_opt--' + date + '-' + y_stat,
-                            'sub-' + subject + '_DEAP_component_scores_' + measure + '_' +
-                            y_stat + '_' + debug_out + '.csv'))
+    out_df.to_csv(op.join(opt_dir, subject + '_' + dataset + '_component_scores_' +
+                            measure + '_' + y_stat + debug_out + '.csv'))
 
     mean_df = out_df.groupby('n_components').mean().reset_index()
     best_components = {
@@ -226,11 +223,11 @@ for subject in subjects:
             print(scores)
         all_scores[key] = scores
     
-    scores_dir = op.join(derivative_path, measure + '_scores--' + date + '-' + y_stat)
+    scores_dir = op.join(pred_path, date, measure + '_' + y_stat + '_scores--' + date)
     if not os.path.exists(scores_dir):
         os.makedirs(scores_dir)
-        
-    np.save(op.join(scores_dir,'sub-' + subject + '_all_scores_models_DEAP_' + measure + '_' +
+    
+    np.save(op.join(scores_dir, subject + '_all_scores_models_DEAP_' + measure + '_' +
                             y_stat + '_' + score_name + '_' + cv_name + debug_out + '.npy'),
             all_scores)
     
@@ -276,20 +273,19 @@ for subject in subjects:
         ax.plot(times, y_preds, color='b', alpha = 0.5, label=f'Predicted {measure}')
         ax.set_xlabel('Time (epochs)')
         ax.set_ylabel(f'{measure} {y_stat}')
-        ax.set_title(f'Sub {subject} - {model} model - {measure} prediction\nR2 = {score_opt}')
+        ax.set_title(f'{subject} - {model} model - {measure} prediction\nR2 = {score_opt}')
         plt.legend()
         
-        plot_dir = op.join(derivative_path, measure + '_plot--' + date + '-' + y_stat)
+        plot_dir = op.join(pred_path, date, measure + '_' + y_stat + '_plot--' + date)
         if not os.path.exists(plot_dir):
             os.makedirs(plot_dir)
             
-        plt_path = op.join(derivative_path, measure + '_plot--' + date + '-' + y_stat,
-                            'sub-' + subject + '_DEAP_plot_prediction_' + model + '_' +
-                            measure + '_' + y_stat + '_' + debug_out + '.png')
+        plt_path = op.join(plot_dir, subject + '_' + measure + '_' + y_stat +
+                           '_DEAP_plot_prediction_' + model + debug_out + '.png')
         plt.savefig(plt_path)
         
-    np.save(op.join(scores_dir, 'sub-' + subject + '_y_and_y_pred_opt_models_' +
-                    measure + '_' + y_stat + '_' + debug_out + '.npy'),
+    np.save(op.join(scores_dir, subject + '_' + measure + '_' + y_stat +
+                    '_y_and_y_pred_opt_models' + debug_out + '.npy'),
             y_and_y_pred_opt_models)
         
     del pipelines[f"spoc_{best_components['spoc']}"]
