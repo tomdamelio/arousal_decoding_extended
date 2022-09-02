@@ -122,8 +122,11 @@ def run_subject(subject, cfg, condition):
     try:
         if feature_type == 'EDA':       
             epochs = epochs.copy().pick_channels(ch_names=['EDA'])
-            if int(subject.strip('sub-')) > 22:
-                epochs.apply_function(fun=lambda x: 10**9/x)
+            picks_eda = mne.pick_channels(ch_names = epochs.ch_names ,include=['EDA'])       
+            if int(subject) < 23:
+                epochs.apply_function(fun=lambda x: x/1000, picks=picks_eda)
+            else:
+                epochs.apply_function(fun=lambda x: (10**9/x)/1000, picks=picks_eda)
             out = extract_EDA_measures(epochs)
         elif feature_type == 'EMG':
             epochs = epochs.copy().pick_types(emg=True)
