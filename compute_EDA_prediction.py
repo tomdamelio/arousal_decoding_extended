@@ -32,7 +32,7 @@ measure = 'eda'
 # var or mean?   
 y_stat = 'var'
 
-DEBUG = True
+DEBUG = False
 
 ################################
 
