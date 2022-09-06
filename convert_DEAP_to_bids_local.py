@@ -11,7 +11,7 @@ from mne_bids import BIDSPath, make_report, print_dir_tree, write_raw_bids
 from subject_number import subject_number as subject_ids
 
 #%%
-def convert_deap_to_bids(deap_data_dir, bids_save_dir, n_jobs=1, DEBUG=False):
+def convert_deap_to_bids(deap_data_dir, bids_save_dir, n_jobs=-1, DEBUG=False):
     """Convert DEAP dataset to BIDS format.
     Parameters
     ----------

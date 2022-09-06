@@ -29,8 +29,8 @@ parser.add_argument(
     nargs='+',
     help='the dataset for which preprocessing should be computed')
 parser.add_argument(
-    '--n_jobs', type=int, default=3,
-    help='number of parallel processes to use')
+    '--n_jobs', type=int, default=-1,
+    help='number of parallel processes to use (Default = -1)')
 args = parser.parse_args()
 datasets = args.dataset
 n_jobs = args.n_jobs

@@ -91,8 +91,11 @@ import mne
 subject = '01'
 epo = mne.read_epochs(f'C:/Users/dadam/arousal_project/arousal_decoding_extended/outputs/DEAP-bids/derivatives/mne-bids-pipeline/sub-' + subject + '/eeg/sub-' + subject + '_task-rest_proc-EDA_epo.fif')
 epo.info
+#%%
 %matplotlib
 epo.plot(picks='EDA')
+
+
 # %%
 # check EMG pochs
 import mne

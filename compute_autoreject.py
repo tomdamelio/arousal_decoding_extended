@@ -67,7 +67,7 @@ def run_subject(subject, cfg):
     if analyze_channels:
         epochs.pick_channels(analyze_channels)
 
-    ar = autoreject.AutoReject(n_jobs=1, cv=5)
+    ar = autoreject.AutoReject(n_jobs=1, cv=5, seed=42)
     epochs, return_log = ar.fit_transform(epochs, return_log=True)
     # important do do this after autorject but before source localization
     # particularly important as TUAB needs to be re-referenced

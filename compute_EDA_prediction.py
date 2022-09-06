@@ -47,7 +47,7 @@ date = datetime.datetime.now().strftime("%d-%m--%H-%M")
 n_components = np.arange(1, 32, 1)
 seed = 42
 n_splits = 2
-n_jobs = 15
+n_jobs = -1
 score_name, scoring = "r2", "r2"
 cv_name = '2Fold'
 

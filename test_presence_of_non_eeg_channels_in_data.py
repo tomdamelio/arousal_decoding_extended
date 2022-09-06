@@ -1,7 +1,7 @@
 #%%
 import mne
-#fname = './outputs/DEAP-bids/sub-01/eeg/sub-01_task-rest_eeg.bdf' 
-fname = './data/s01.bdf
+fname = './outputs/DEAP-bids/sub-01/eeg/sub-01_task-rest_eeg.bdf' 
+#fname = './data/s01.bdf
 raw = mne.io.read_raw_bdf(fname)
 # %%
 raw.info
@@ -23,4 +23,7 @@ raw.set_channel_types({'EXG1': 'eog',
                         'Resp': 'misc',
                         'Plet': 'misc',
                         'Temp': 'misc'}) 
+# %%
+%matplotlib
+raw.plot()
 # %%
