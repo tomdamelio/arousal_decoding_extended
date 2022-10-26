@@ -47,17 +47,17 @@ def make_EDA_EMG_and_EOG_epochs(subject, cfg):
     epochs = mne.read_epochs(epo_fname_in, proj=False)
     
     # Make epochs EDA
-    epochsEDA = epochs.copy().pick_channels(ch_names=['EDA'])
+    epochsEDA = epochs.copy().pick_channels(ch_names=['EDA_Phasic','EDA_Tonic', 'EDA_SMNA'])
     epo_fname_out_EDA = epo_fname_in.copy().update(processing="EDA")
     epochsEDA.save(epo_fname_out_EDA, overwrite=True)
     
     # Make epochs EMG
-    epochsEMG = epochs.copy().pick_types(emg=True)
+    epochsEMG = epochs.copy().pick_channels(ch_names=['EMG_Amplitude_5', 'EMG_Amplitude_6'])
     epo_fname_out_EMG = epo_fname_in.copy().update(processing="EMG")
     epochsEMG.save(epo_fname_out_EMG, overwrite=True)
     
     # Make epochs EOG
-    epochsEOG = epochs.copy().pick_types(eog=True)
+    epochsEOG = epochs.copy().pick_channels(ch_names=['EOG_Cleaned'])
     epo_fname_out_EOG = epo_fname_in.copy().update(processing="EOG")
     epochsEOG.save(epo_fname_out_EOG, overwrite=True)
     
@@ -69,8 +69,8 @@ for dataset in datasets:
     N_JOBS = (n_jobs if n_jobs else cfg.N_JOBS)
 
     if DEBUG:
-        subjects = subjects[:1]
-        N_JOBS = 1
+        subjects = subjects[:5]
+        N_JOBS = 4
 
     print(f"Computing EDA, EMG and EOG epochs on {dataset}")
     logging = Parallel(n_jobs=N_JOBS)(

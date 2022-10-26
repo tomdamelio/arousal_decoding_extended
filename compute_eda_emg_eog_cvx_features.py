@@ -1,19 +1,21 @@
+#%%epare_dataset
 import argparse
 from multiprocessing import Value
 
+import numpy as np
 import pandas as pd
 from joblib import Parallel, delayed
 
 import mne
 from mne_bids import BIDSPath
-import coffeine
+
 import h5io
 
 from utils import prepare_dataset
 
 DATASETS = ['deap']
-FEATURE_TYPE = ['fb_covs']
-parser = argparse.ArgumentParser(description='Compute features EEG.')
+FEATURE_TYPE = ['EDA', 'EMG', 'EOG']
+parser = argparse.ArgumentParser(description='Compute features EDA EMG EOG.')
 parser.add_argument(
     '-d', '--dataset',
     default=None,
@@ -25,7 +27,7 @@ parser.add_argument(
     nargs='+', help='Type of features to compute')
 parser.add_argument(
     '--n_jobs', type=int, default=-1,
-    help='number of parallel processes to use (default: Max jobs)')
+    help='number of parallel processes to use (default: Max available)')
 
 args = parser.parse_args()
 datasets = args.dataset
@@ -44,27 +46,53 @@ for dataset, feature_type in tasks:
 print(f"Running benchmarks: {', '.join(feature_types)}")
 print(f"Datasets: {', '.join(datasets)}")
 
+
 DEBUG = False
 
-frequency_bands = {
-    "delta": (0.1, 4.0),
-    "theta": (4.0, 8.0),
-    "alpha": (8.0, 14.0),
-    "beta": (14.0, 30.0),
-    "gamma": (30.0, 80.0),
-}
+def extract_EDA_measures(epochs):
+    # Input -> EpochsEDA
+    # Output -> n_epochs x 6 features (meanEDA and varEDA, phasic tonic and SMNA components)
+    
+    EDA_mean = epochs.get_data().mean(axis=2) # keep 3 EDA means
+    EDA_var = epochs.get_data().var(axis=2) # keep 3 EDA vars
+    EDA_features_ndarray = np.hstack((EDA_mean,EDA_var))
+    df_EDA_features = pd.DataFrame(EDA_features_ndarray, columns = ['meanEDA_Phasic', 'meanEDA_Tonic',
+                                    'meanEDA_SMNA', 'varEDA_Phasic',
+                                    'varEDA_Tonic', 'varEDA_SMNA'])
+    EDA_features = df_EDA_features.to_dict(orient = 'list')
+    for key, value in EDA_features.items():
+        EDA_features[key] = np.array(value)
+    return EDA_features  
+    
+def extract_EMG_measures(epochs):
+    # Input -> EpochsEMG
+    # Output -> n_epochs x 2 features (meanEMG and varEMG)
+    epochs = epochs.copy().pick_channels(['EMG_Amplitude_5','EMG_Amplitude_6'])
+    EMG_features = {}
 
-def extract_fb_covs(epochs, condition):
-    covs = list()
-    for ii in range(len(epochs)):
-        features, meta_info = coffeine.compute_features(
-            epochs[condition][ii],
-            features=('covs'),
-            fmax=80.,
-            frequency_bands=frequency_bands)
-        covs.append([c for c in features['covs']])
-    features['meta_info'] = meta_info
-    return covs
+    # EMG activity = EMG z1 - EMG z2
+    emg = epochs.get_data()
+    emgz1 = emg[:,0,:]
+    emgz2 = emg[:,1,:]
+    
+    emg_delta = emgz1 - emgz2
+    
+    EMG_features['meanEMG']  = emg_delta.mean(axis=1)
+    EMG_features['varEMG'] = emg_delta.var(axis=1)        
+
+    return EMG_features 
+
+def extract_EOG_measures(epochs):
+    # Input -> EpochsEOG
+    # Output -> n_epochs x 2 features (meanEOG and varEOG)
+
+    EOG_features = {}
+    EOG_mean = epochs.get_data().mean(axis=2)[:, 0]
+    EOG_var = epochs.get_data().var(axis=2)[:, 0]  
+    EOG_features['meanEOG'] = EOG_mean
+    EOG_features['varEOG'] = EOG_var
+    return EOG_features 
+
 
 def run_subject(subject, cfg, condition):
     task = cfg.task
@@ -75,9 +103,9 @@ def run_subject(subject, cfg, condition):
         session = session.lstrip('ses-')
 
     bp_args = dict(root=deriv_root, subject=subject,
-                    datatype=data_type, processing="autoreject",
+                    datatype=data_type, processing=feature_type,
                     task=task,
-                    check=False, suffix="epo")
+                    check=False, suffix="epoRejected")
     if session:
         bp_args['session'] = session
     bp = BIDSPath(**bp_args)
@@ -90,10 +118,20 @@ def run_subject(subject, cfg, condition):
         return 'condition not found'
     out = None
     # make sure that no EOG/ECG made it into the selection
-    epochs.pick_types(**{data_type: True})
+    
     try:
-        if feature_type == 'fb_covs':
-            out = extract_fb_covs(epochs, condition)
+        if feature_type == 'EDA':       
+            epochs = epochs.copy().pick_channels(ch_names=['EDA_Phasic', 'EDA_Tonic', 'EDA_SMNA'])
+            picks_eda = mne.pick_channels(ch_names = epochs.ch_names ,include=['EDA_Phasic', 'EDA_Tonic', 'EDA_SMNA'])       
+            #if int(subject) > 22:
+            #    epochs.apply_function(fun=lambda x: 10**9/x, picks=picks_eda)
+            out = extract_EDA_measures(epochs)
+        elif feature_type == 'EMG':
+            epochs = epochs.copy().pick_channels(ch_names=['EMG_Amplitude_5', 'EMG_Amplitude_6'])
+            out = extract_EMG_measures(epochs)
+        elif feature_type == 'EOG':
+            epochs = epochs.copy().pick_channels(ch_names=['EOG_Cleaned'])
+            out = extract_EOG_measures(epochs)
         else:
             NotImplementedError()
     except Exception as err:

@@ -9,7 +9,7 @@ from mne_bids import BIDSPath, make_report, print_dir_tree, write_raw_bids
 
 from subject_number import subject_number as subject_ids
 
-def convert_deap_to_bids(deap_data_dir, bids_save_dir, n_jobs=-1, DEBUG=False):
+def convert_deap_to_bids(deap_data_dir, bids_save_dir, n_jobs=1, DEBUG=False):
     """Convert DEAP dataset to BIDS format.
     Parameters
     ----------
@@ -22,9 +22,10 @@ def convert_deap_to_bids(deap_data_dir, bids_save_dir, n_jobs=-1, DEBUG=False):
         Number of jobs for parallelization.
     """
     if DEBUG:
-        subjects_ = subject_ids[:1]
+        subjects_ = subject_ids[:5]        
     else:
-        subjects_ = subject_ids
+        #subjects_ = subject_ids
+        subjects_ = subject_ids[22:]
     
         
     if not bids_save_dir.exists():
@@ -102,8 +103,8 @@ if __name__ == '__main__':
         default=pathlib.Path("./outputs/DEAP-bids"),
         help='Path to where the converted data should be saved.')
     parser.add_argument(
-        '--n_jobs', type=int, default=-1,
-        help='number of parallel processes to use (default: -1)')
+        '--n_jobs', type=int, default=1,
+        help='number of parallel processes to use (default: 1)')
     parser.add_argument(
         '--DEBUG', type=bool, default=False,
         help='activate debugging mode')

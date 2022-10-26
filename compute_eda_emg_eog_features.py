@@ -72,8 +72,8 @@ def extract_EMG_measures(epochs):
     
     emg_delta = emgz1 - emgz2
     
-    EMG_features['meanEDA']  = emg_delta.mean(axis=1)
-    EMG_features['varEDA'] = emg_delta.var(axis=1)        
+    EMG_features['meanEMG']  = emg_delta.mean(axis=1)
+    EMG_features['varEMG'] = emg_delta.var(axis=1)        
 
     return EMG_features 
 

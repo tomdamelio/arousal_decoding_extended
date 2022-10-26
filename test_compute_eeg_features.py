@@ -1,4 +1,5 @@
 #%%
+
 import h5io
 import numpy as np
 import pandas as pd
@@ -35,7 +36,7 @@ subjects = df_subjects.index.values
 subjects = subjects.tolist()
 
 
-DEBUG = True
+DEBUG = False
 if DEBUG:
     subjects = ['sub-01','sub-02','sub-03']
     
@@ -50,18 +51,18 @@ for sub in subjects:
     dict_features[sub] = X_cov  
 
 #%%        
-df_features = pd.DataFrame.from_dict(pd.DataFrame(
-        {band: list(dict_features['sub-01'][:, ii]) for ii, band in
-        enumerate(frequency_bands)}))
-
-#%%    
-    df_features = pd.DataFrame(
-        {band: list(X_cov[:, ii]) for ii, band in
-        enumerate(frequency_bands)})
-# %%
-# Pruebo abrir cov matrices de mi tesis
-import mne
-import h5io
-covs_viejo = h5io.read_hdf5('C:/Users/dadam/OneDrive/Escritorio/tomas_damelio/outputs/DEAP-bids/derivatives/mne-bids-pipeline-eda/eda-cov-matrices-all-freqs/sub-02_covariances_eda.h5')
+#df_features = pd.DataFrame.from_dict(pd.DataFrame(
+#        {band: list(dict_features['sub-01'][:, ii]) for ii, band in
+#        enumerate(frequency_bands)}))
+#
+##%%    
+#    df_features = pd.DataFrame(
+#        {band: list(X_cov[:, ii]) for ii, band in
+#        enumerate(frequency_bands)})
+## %%
+## Pruebo abrir cov matrices de mi tesis
+#import mne
+#import h5io
+#covs_viejo = h5io.read_hdf5('C:/Users/dadam/OneDrive/Escritorio/tomas_damelio/outputs/DEAP-bids/derivatives/mne-bids-pipeline-eda/eda-cov-matrices-all-freqs/sub-02_covariances_eda.h5')
 
 # %%

@@ -6,8 +6,10 @@ import pathlib
 
 import numpy as np
 import mne
+import neurokit2 as nk
 
 from subject_number import subject_number
+from aux_functions import cvxEDA_pyEDA
 
 DEBUG = True
 
@@ -68,19 +70,66 @@ for i in subject_number:
         picks = mne.pick_types(raw.info, eeg=True, eog=False, stim=False, exclude='bads')
         raw.notch_filter(np.arange(50, 250, 50), picks=picks, filter_length='auto',
                 phase='zero')
-        raw.filter(l_freq, h_freq)
+        raw.filter(l_freq, h_freq, picks=picks)
         
-        # Filter EDA signal
-        #picks_EDA = mne.pick_channels(raw.info['ch_names'], include=['EDA'])
-        #raw.filter(.05, 5., picks=picks_EDA)
+        # Extract EDA data 
+        raw_eda = raw.copy().pick_channels(ch_names=['EDA']).get_data()
+        raw_eda = np.squeeze(raw_eda)
+        # Perform EDA preprocessing according to neurokit
+        data_eda = nk.eda_phasic(nk.standardize(raw_eda), sampling_rate=512)
+        # add phasic and tonic components to Raw object 
+        eda_phasic = data_eda["EDA_Phasic"]
+        eda_tonic = data_eda["EDA_Tonic"]
         
+        # Extract EMG data 
+        raw_emg_5 = raw.copy().pick_channels(['EXG5']).get_data()
+        raw_emg_5 = np.squeeze(raw_emg_5)
+        raw_emg_6 = raw.copy().pick_channels(['EXG6']).get_data()
+        raw_emg_6 = np.squeeze(raw_emg_6)
+        # Perform EMG preprocessing according to neurokit
+        signals_5, _ = nk.emg_process(raw_emg_5, sampling_rate=512)
+        signals_6, _ = nk.emg_process(raw_emg_6, sampling_rate=512)
+        emg_amplitude_5 = signals_5["EMG_Amplitude"]
+        emg_amplitude_6 = signals_6["EMG_Amplitude"]
+        
+        # Extract EOG data 
+        raw_eog_3 = raw.copy().pick_channels(['EXG3']).get_data()
+        raw_eog_3 = np.squeeze(raw_eog_3)
+        eog_cleaned = nk.eog_clean(raw_eog_3, sampling_rate=512,  method='neurokit')   
 
-        #%%
-        # Filter EMG signal
-        picks_EMG = mne.pick_types(raw.info, emg = True)
-        raw.filter(20., None, picks=picks_EMG)
+        
+        # SEGUIR DESDE ACA -> concateno todas las medidas!
+        peripheral_data = np.concatenate([
+            np.atleast_2d(eda_phasic),
+            np.atleast_2d(eda_tonic),
+            np.atleast_2d(emg_amplitude_5),
+            np.atleast_2d(emg_amplitude_6),
+            np.atleast_2d(eog_cleaned)
+        ])
+
+        peripheral_info = mne.create_info(
+            ch_names=["EDA_Phasic", "EDA_Tonic", "EMG_Amplitude_5", "EMG_Amplitude_6", "EOG_Cleaned"],
+            sfreq=raw.info["sfreq"],
+            ch_types=["misc", "misc", "emg", "emg", "eog"]
+        )
+
+        peripheral_info["line_freq"] = raw.info["line_freq"]
+        peripheral_info["subject_info"] = raw.info["subject_info"]
+
+        with peripheral_info._unlock():
+            peripheral_info["lowpass"] = raw.info["lowpass"]
+            peripheral_info["highpass"] = raw.info["highpass"]
+            
+        peripheral_raw = mne.io.RawArray(
+            data=peripheral_data,
+            info=peripheral_info,
+            first_samp=raw.first_samp,
+        )
+        peripheral_raw.anonymize()
+        raw.add_channels([peripheral_raw])
 
         # Export .fif files with annotations
         raw.save(fname = fname_fif, overwrite=True)
+        
     except Exception as e:
         logging.error('Error at %s', exc_info=e)

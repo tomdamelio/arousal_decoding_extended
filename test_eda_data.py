@@ -3,15 +3,15 @@
 import mne
 import matplotlib.pyplot as plt
 
-subject = '02'
+subject = '01'
 epo = mne.read_epochs(f'C:/Users/dadam/arousal_project/arousal_decoding_extended/outputs/DEAP-bids/derivatives/mne-bids-pipeline/sub-' + subject + '/eeg/sub-' + subject + '_task-rest_proc-clean_epo.fif')
 epo.info
 
 epochsEDA = epo.copy().pick_channels(ch_names=['EDA'])
 
-EDA_var = epochsEDA.get_data().var(axis=2)[:, 0]  
-#%matplotlib
-#plt.plot(EDA_var)
+EDA_var_2022 = epochsEDA.get_data().var(axis=2)[:, 0]  
+%matplotlib
+plt.plot(EDA_var_2022)
 #%%
 # This data is really similar to the I plotted in the final scripts
 # I will start from raw raw data to see if I can reproduce the results of my thesis regarding True EDA

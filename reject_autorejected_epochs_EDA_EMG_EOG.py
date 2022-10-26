@@ -38,7 +38,7 @@ if datasets is None:
     datasets = list(DATASETS)
 print(f"Datasets: {', '.join(datasets)}")
 
-DEBUG = False
+DEBUG = True
 
 def reject_epochs(subject, cfg):
     
@@ -112,8 +112,8 @@ for dataset in datasets:
     N_JOBS = (n_jobs if n_jobs else cfg.N_JOBS)
 
     if DEBUG:
-        subjects = subjects[:3]
-        N_JOBS = 1
+        subjects = subjects[22:]
+        N_JOBS = 3
 
     print(f"Reject autorejeted Epochs in EDA EMG and EOG on {dataset}")
     logging = Parallel(n_jobs=N_JOBS)(

@@ -25,7 +25,7 @@ if datasets is None:
     datasets = list(DATASETS)
 print(f"Datasets: {', '.join(datasets)}")
 
-DEBUG = False
+DEBUG = True
 
 def _get_global_reject_ssp(raw, decim):
     if 'eog' in raw:
@@ -86,7 +86,7 @@ for dataset in datasets:
     N_JOBS = (n_jobs if n_jobs else cfg.N_JOBS)
 
     if DEBUG:
-        subjects = subjects[:1]
+        subjects = subjects[22:]
         N_JOBS = 1
 
     print(f"computing SSP on {dataset}")

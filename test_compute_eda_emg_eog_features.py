@@ -109,7 +109,6 @@ df_subjects = df_subjects.sort_index()
 features = h5io.read_hdf5(
     deriv_root / f'features_{FEATURE_TYPE}_{condition}.h5')
 
-#%%
 eda_features = list()
 subjects = df_subjects.index.values
 subjects = subjects.tolist()
@@ -125,6 +124,37 @@ for sub in subjects:
     eda_features = [features[sub]]
     X_eda_features= np.array([cc for cc in eda_features])
     X_eda_features = np.squeeze(X_eda_features, axis=0)  
-    if DEBUG:
-        X_cov = X_cov[:30,:,:,:]
-    dict_features[sub] = X_cov  
+    #if DEBUG:
+    #    X_eda_features = X_eda_features[:30,:,:,:]
+    dict_features[sub] = X_eda_features  
+    
+# %%
+#Open data and inspect new channels (created after `add_annotations`. This has to be in `epoched EDA`)
+import numpy as np
+import pandas as pd
+import mne
+pathEDA = './outputs/DEAP-bids/derivatives/mne-bids-pipeline/sub-03/eeg/sub-03_task-rest_proc-EDA_epoRejected.fif'
+epochs = mne.read_epochs(pathEDA, proj=False, preload=True)
+epochs.info
+
+
+#%%
+# Open filter data file and see if there are alls peripheral singals there
+import numpy as np
+import pandas as pd
+import mne
+#pathEDA = './outputs/DEAP-bids/derivatives/mne-bids-pipeline/sub-03/eeg/sub-03_task-rest_proc-clean_epo.fif'
+pathEDA = './outputs/DEAP-bids/derivatives/mne-bids-pipeline/sub-03/eeg/sub-03_task-rest_proc-EDA_epo.fif'
+epochs = mne.read_epochs(pathEDA, proj=False, preload=True)
+epochs.info
+
+#%%
+# test compute_eda_features
+
+
+
+
+#%%
+epochs = epochs.copy().pick_channels(ch_names=['EDA_Phasic','EDA_Tonic'])
+
+

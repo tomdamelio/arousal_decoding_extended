@@ -10,7 +10,7 @@ source_info_path_update = {'processing': 'autoreject',
                            'suffix': 'epo'}
 
 if os.name == 'nt':
-    N_JOBS = 4
+    N_JOBS = 1
 else:
     N_JOBS = 30
 
@@ -18,7 +18,11 @@ task = 'rest'
 ch_types = ['eeg']
 sessions = []
 data_type = 'eeg'
+
 subjects = 'all'
+#subjects = ['01', '02', '03', '04', '05']
+#subject_number = ['23', '24', '25', '26', '27', '28', '29', '30', '31', '32']
+    
 drop_channels = ['GSR2', 'Erg1', 'Erg2']
 eeg_reference = [] 
 eeg_template_montage: 'biosemi32'
