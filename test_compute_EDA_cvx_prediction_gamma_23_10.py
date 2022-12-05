@@ -73,8 +73,9 @@ features_y = h5io.read_hdf5(deriv_root / f'features_EDA_{condition}.h5')
 covs = list()
 
 if DEBUG:
-    subjects = ['sub-01','sub-02','sub-03','sub-04','sub-05']
-    n_jobs = 4
+    subjects = ['sub-23','sub-24','sub-25','sub-26','sub-27',
+                'sub-28','sub-29','sub-30','sub-31','sub-32']
+    n_jobs = 3
     debug_out = '_DEBUG'
 else:
     subjects = df_subjects.index.values
@@ -86,7 +87,7 @@ dict_features = {}
 #%%
 import matplotlib.pyplot as plt
 
-subjects = ['sub-21']
+subjects = ['sub-03']
 
 for subject in subjects:
     

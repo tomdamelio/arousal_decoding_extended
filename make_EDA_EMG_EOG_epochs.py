@@ -40,8 +40,7 @@ def make_EDA_EMG_and_EOG_epochs(subject, cfg):
                          root=cfg.deriv_root)
 
     # Prepare a name to save the data
-    epo_fname_in = bids_path.copy().update(processing='clean',
-                                            suffix='epo',
+    epo_fname_in = bids_path.copy().update(suffix='epo',
                                             check=False)
         
     epochs = mne.read_epochs(epo_fname_in, proj=False)

@@ -38,7 +38,7 @@ if datasets is None:
     datasets = list(DATASETS)
 print(f"Datasets: {', '.join(datasets)}")
 
-DEBUG = True
+DEBUG = False
 
 def reject_epochs(subject, cfg):
     

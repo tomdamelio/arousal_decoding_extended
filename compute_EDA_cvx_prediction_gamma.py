@@ -119,20 +119,15 @@ features_y = h5io.read_hdf5(deriv_root / f'features_EDA_{condition}.h5')
 covs = list()
 
 if DEBUG:
-    subjects = ['sub-01','sub-02','sub-03','sub-04','sub-05']
-    n_jobs = 4
+    subjects = ['sub-23','sub-24','sub-25','sub-26','sub-27',
+                'sub-28','sub-29','sub-30','sub-31','sub-32']
+    n_jobs = 3
     debug_out = '_DEBUG'
 else:
     subjects = df_subjects.index.values
     subjects = subjects.tolist()
     debug_out = ''
-
-subjects = ['sub-01']
-n_jobs = 3
-
-print([i for i in subjects])
-
-dict_features = {}    
+    n_jobs = 3
 
 #%%
 
@@ -149,9 +144,9 @@ for subject in subjects:
     del eda_features
     y = y[:len(y)-int(len(y)/20)] # Crop last 20th part of signal (considering problems in cvXEDA algorithm)
     
-    print(subject)
-    print(len(y))
-    plt.plot(y)
+    #print(subject)
+    #print(len(y))
+    #plt.plot(y)
     
     ###### read cov matrices -> X #####
     covs = [features_X[subject]]

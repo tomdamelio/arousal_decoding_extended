@@ -19,8 +19,8 @@ ch_types = ['eeg']
 sessions = []
 data_type = 'eeg'
 
-subjects = 'all'
-#subjects = ['01', '02', '03', '04', '05']
+#subjects = 'all'
+subjects = ['01', '23']
 #subject_number = ['23', '24', '25', '26', '27', '28', '29', '30', '31', '32']
     
 drop_channels = ['GSR2', 'Erg1', 'Erg2']
